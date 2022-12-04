@@ -1,19 +1,17 @@
-package D2;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+package Days;
 
 import Util.Util;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class D2 {
 
     private final Integer[][] scores = {
-            { 3, 0, 6 },
-            { 6, 3, 0 },
-            { 0, 6, 3 }
+            {3, 0, 6},
+            {6, 3, 0},
+            {0, 6, 3}
     };
 
     public D2() throws IOException {
@@ -47,7 +45,7 @@ public class D2 {
         int desired = "X".equals(outcome)
                 ? 6
                 : "Y".equals(outcome) ? 3 : 0;
-        String[] choices = { "X", "Y", "Z" };
+        String[] choices = {"X", "Y", "Z"};
         return choices[row.indexOf(desired)];
     }
 

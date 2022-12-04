@@ -1,4 +1,4 @@
-package D3;
+package Days;
 
 import Util.Util;
 
@@ -14,7 +14,7 @@ public class D3 {
 
         List<String> file = Util.readInput(3, false);
 
-        List<Rucksack> rucksacks = file.stream().map(a -> new Rucksack(a)).toList();
+        List<Rucksack> rucksacks = file.stream().map(Rucksack::new).toList();
 
         int sum = 0;
         int a = 'a';

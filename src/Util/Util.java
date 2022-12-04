@@ -12,11 +12,11 @@ public class Util {
     }
 
     public static List<String> readInput(Integer day, boolean test) throws IOException {
-        String fileName = "src/D" + day;
+        String fileName = "src/Data/d" + day;
         if (test) {
-            fileName += "/test.txt";
+            fileName += "test.txt";
         } else {
-            fileName += "/input.txt";
+            fileName += "input.txt";
         }
         Path path = Path.of(fileName);
         return Files.readAllLines(path, StandardCharsets.UTF_8);
