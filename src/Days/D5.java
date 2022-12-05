@@ -31,13 +31,13 @@ public class D5 {
 
         for (int i = stackInitInd + 1; i < file.size(); ++i) {
             String line = file.get(i);
-            String parts[] = line.trim().split(" ");
+            String[] parts = line.trim().split(" ");
             int count = Integer.parseInt(parts[1]);
             int src = Integer.parseInt(parts[3]) - 1;
             int dst = Integer.parseInt(parts[5]) - 1;
-            String move = "";
+            StringBuilder move = new StringBuilder();
             for (int j = 0; j < count; ++j) {
-                move += stacks.get(src).pop();
+                move.append(stacks.get(src).pop());
             }
 
             for (int j = move.length() - 1; j >= 0; --j) {
@@ -45,10 +45,10 @@ public class D5 {
             }
         }
 
-        String output = "";
-        for (Stack s : stacks) {
+        StringBuilder output = new StringBuilder();
+        for (Stack<Character> s : stacks) {
             if (s.size() > 0) {
-                output += s.pop();
+                output.append(s.pop());
             }
         }
         System.out.println(output);
