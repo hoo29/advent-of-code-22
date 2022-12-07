@@ -19,8 +19,7 @@ public class D6 {
         int i = 0;
         for (; i < line.length() - 4; ++i) {
             String seg = line.substring(i, i + 4);
-            Set<String> buff = new HashSet<>();
-            buff.addAll(Arrays.asList(seg.split("")));
+            Set<String> buff = new HashSet<>(Arrays.asList(seg.split("")));
             if (buff.size() == 4) {
                 break;
             }
@@ -31,8 +30,7 @@ public class D6 {
         i = 0;
         for (; i < line.length() - 14; ++i) {
             String seg = line.substring(i, i + 14);
-            Set<String> buff = new HashSet<>();
-            buff.addAll(Arrays.asList(seg.split("")));
+            Set<String> buff = new HashSet<>(Arrays.asList(seg.split("")));
             if (buff.size() == 14) {
                 break;
             }
