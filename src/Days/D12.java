@@ -3,7 +3,10 @@ package Days;
 import Util.Util;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 public class D12 {
 
@@ -41,7 +44,7 @@ public class D12 {
         }
 
         while (unvisited.size() > 0) {
-            unvisited.sort((a, b) -> a.tentDistance - b.tentDistance);
+            unvisited.sort(Comparator.comparingInt(a -> a.tentDistance));
             Node current = unvisited.remove(0);
             if (current.tentDistance == Integer.MAX_VALUE) {
                 System.out.println("All nodes visited");
