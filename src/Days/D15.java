@@ -93,9 +93,6 @@ public class D15 {
                 int width = dist - Math.abs(sensor.y - row);
                 if (width > 0) {
                     ranges.add(new int[] { sensor.x - width, sensor.x + width });
-                    // for (int i = sensor.x - width; i <= sensor.x + width; ++i) {
-                    // thingsInRow.add(i);
-                    // }
                 }
             }
 
@@ -108,7 +105,6 @@ public class D15 {
                     int x = max + 1;
                     BigInteger why = BigInteger.valueOf(x).multiply(BigInteger.valueOf(4000000))
                             .add(BigInteger.valueOf(row));
-                    // 2015236781 too low
                     System.out.println("found gap y " + row + " x " + max + 1);
                     System.out.println("frequency " + why);
                     gap = true;
@@ -122,19 +118,6 @@ public class D15 {
             if (gap) {
                 break;
             }
-            // List<Integer> things = new ArrayList<>(thingsInRow);
-            // things.sort(Comparator.comparingInt(a -> a));
-            // boolean gap = false;
-            // for (int i = 0; i < thingsInRow.size() - 1; ++i) {
-            // if (things.get(i) != (things.get(i + 1) - 1)) {
-            // System.out.println("found gap y " + row + " x " + (things.get(i) + 1));
-            // gap = true;
-            // break;
-            // }
-            // }
-            // if (gap) {
-            // break;
-            // }
         }
 
     }
