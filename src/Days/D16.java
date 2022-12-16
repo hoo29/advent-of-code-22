@@ -47,6 +47,7 @@ public class D16 {
                 p2Max = val;
             }
         }
+        pool.shutdown();
 
         System.out.println(p2Max);
     }
