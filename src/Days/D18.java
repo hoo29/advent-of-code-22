@@ -3,20 +3,16 @@ package Days;
 import Util.Util;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 public class D18 {
 
-
     public D18() throws IOException {
 
-        List<String> file = Util.readInput(18, true);
+        List<String> file = Util.readInput(18, false);
         Map<Cord, Integer> notConnectedCount = new HashMap<>();
 
-        final Set<Cord> cords = file.stream().reduce(
+        final Set<Cord> droplet = file.stream().reduce(
                 new HashSet<>(),
                 (acc, a) -> {
                     int[] cord = Arrays.stream(a.split(","))
@@ -29,8 +25,7 @@ public class D18 {
                 (a, b) -> {
                     a.addAll(b);
                     return a;
-                }
-        );
+                });
 
         int sum = 0;
         int maxx = Integer.MIN_VALUE;
@@ -41,7 +36,7 @@ public class D18 {
         int miny = Integer.MAX_VALUE;
         int minz = Integer.MAX_VALUE;
 
-        for (final Cord c : cords) {
+        for (final Cord c : droplet) {
             if (c.x > maxx) {
                 maxx = c.x;
             }
@@ -67,7 +62,7 @@ public class D18 {
             }
 
             int notConnected = 0;
-            Cord[] toCheck = new Cord[]{
+            Cord[] toCheck = new Cord[] {
                     new Cord(c.x - 1, c.y, c.z),
                     new Cord(c.x + 1, c.y, c.z),
 
@@ -79,7 +74,7 @@ public class D18 {
             };
             int cordNotConnectedCount = 0;
             for (final Cord check : toCheck) {
-                if (!cords.contains(check)) {
+                if (!droplet.contains(check)) {
                     ++cordNotConnectedCount;
                 }
             }
@@ -89,220 +84,47 @@ public class D18 {
 
         System.out.println(sum);
 
+        Stack<Cord> waterToGrow = new Stack<>();
+        Set<Cord> allWater = new HashSet<>();
+
+        Cord waterSeed = new Cord(minx - 1, miny - 1, minz - 1);
+        waterToGrow.add(waterSeed);
+        allWater.add(waterSeed);
+
         int outsideSum = 0;
-        for (final Cord c : cords) {
-            // ----- x+
-            int wallCount = 0;
-            int point = c.x + 1;
+        while (waterToGrow.size() > 0) {
+            Cord water = waterToGrow.pop();
+            Cord[] toCheck = new Cord[] {
+                    new Cord(water.x - 1, water.y, water.z),
+                    new Cord(water.x + 1, water.y, water.z),
 
-            while (point <= maxx) {
-                Cord move = new Cord(point, c.y, c.z);
-                if (cords.contains(move)) {
-                    ++wallCount;
-                    break;
-                }
-                ++point;
-            }
+                    new Cord(water.x, water.y - 1, water.z),
+                    new Cord(water.x, water.y + 1, water.z),
 
-            // ----- x-
-            point = c.x - 1;
-            while (point >= minx) {
-                Cord move = new Cord(point, c.y, c.z);
-                if (cords.contains(move)) {
-                    ++wallCount;
-                    break;
-                }
-                --point;
-            }
-
-            // ----- y+
-            point = c.y + 1;
-
-            while (point <= maxy) {
-                Cord move = new Cord(c.x, point, c.z);
-                if (cords.contains(move)) {
-                    ++wallCount;
-                    break;
-                }
-                ++point;
-            }
-
-            // ----- y-
-            point = c.y - 1;
-
-            while (point >= miny) {
-                Cord move = new Cord(c.x, point, c.z);
-                if (cords.contains(move)) {
-                    ++wallCount;
-                    break;
-                }
-                --point;
-            }
-
-            // ----- z+
-            point = c.z + 1;
-
-            while (point <= maxz) {
-                Cord move = new Cord(c.x, c.y, point);
-                if (cords.contains(move)) {
-                    ++wallCount;
-                    break;
-                }
-                ++point;
-            }
-
-            // ----- z-
-            point = c.z - 1;
-            while (point >= minz) {
-                Cord move = new Cord(c.x, c.y, point);
-                if (cords.contains(move)) {
-                    ++wallCount;
-                    break;
-                }
-                --point;
-            }
-            if (wallCount != 6) {
-                outsideSum += notConnectedCount.get(c);
-            }
-        }
-
-
-        // 1698 too low
-        System.out.println(outsideSum);
-    }
-
-    public void test2d() throws IOException {
-
-        Path path = Path.of("src/Data/d18test2d.txt");
-        List<String> file = Files.readAllLines(path, StandardCharsets.UTF_8);
-
-        Set<Cord2> cords = file.stream().reduce(
-                new HashSet<>(),
-                (acc, a) -> {
-                    int[] cord = Arrays.stream(a.split(","))
-                            .mapMultiToInt((str, c) -> c.accept(Integer.parseInt(str)))
-                            .toArray();
-
-                    acc.add(new Cord2(cord[0], cord[1]));
-                    return acc;
-                },
-                (a, b) -> {
-                    a.addAll(b);
-                    return a;
-                }
-        );
-
-        int sum = 0;
-        int maxx = Integer.MIN_VALUE;
-        int maxy = Integer.MIN_VALUE;
-
-
-        int minx = Integer.MAX_VALUE;
-        int miny = Integer.MAX_VALUE;
-
-        for (final Cord2 c : cords) {
-
-            if (c.x > maxx) {
-                maxx = c.x;
-            }
-
-            if (c.x < minx) {
-                minx = c.x;
-            }
-
-            if (c.y > maxy) {
-                maxy = c.y;
-            }
-
-            if (c.y < miny) {
-                miny = c.y;
-            }
-
-            int notConnected = 0;
-            Cord2[] toCheck = new Cord2[]{
-                    new Cord2(c.x - 1, c.y),
-                    new Cord2(c.x + 1, c.y),
-
-                    new Cord2(c.x, c.y - 1),
-                    new Cord2(c.x, c.y + 1),
+                    new Cord(water.x, water.y, water.z - 1),
+                    new Cord(water.x, water.y, water.z + 1),
             };
+            for (final Cord check : toCheck) {
 
-            for (final Cord2 check : toCheck) {
-                if (!cords.contains(check)) {
-                    ++notConnected;
+                if (allWater.contains(check)) {
+                    continue;
                 }
+
+                if (check.x >= (maxx + 2) || check.x <= (minx - 2) || check.y >= (maxy + 2) || check.y <= (miny - 2)
+                        || check.z >= (maxz + 2) || check.z <= (minz - 2)) {
+                    continue;
+                }
+
+                if (droplet.contains(check)) {
+                    ++outsideSum;
+                } else {
+                    allWater.add(check);
+                    waterToGrow.add(check);
+                }
+
             }
-            sum += notConnected;
         }
 
-        System.out.println(sum);
-
-        List<Cord2> outside = new ArrayList<>();
-        int outsideSum = 0;
-        for (final Cord2 c : cords) {
-            // ----- x+
-            int point = c.x + 1;
-            boolean isOut = true;
-            while (point <= maxx) {
-                Cord2 move = new Cord2(point, c.y);
-                if (cords.contains(move)) {
-                    isOut = false;
-                    break;
-                }
-                ++point;
-            }
-            if (isOut) {
-                outside.add(c);
-                ++outsideSum;
-            }
-            // ----- x-
-            point = c.x - 1;
-            isOut = true;
-            while (point >= minx) {
-                Cord2 move = new Cord2(point, c.y);
-                if (cords.contains(move)) {
-                    isOut = false;
-                    break;
-                }
-                --point;
-            }
-            if (isOut) {
-                outside.add(c);
-                ++outsideSum;
-            }
-
-            // ----- y+
-            point = c.y + 1;
-            isOut = true;
-            while (point <= maxy) {
-                Cord2 move = new Cord2(c.x, point);
-                if (cords.contains(move)) {
-                    isOut = false;
-                    break;
-                }
-                ++point;
-            }
-            if (isOut) {
-                outside.add(c);
-                ++outsideSum;
-            }
-
-            // ----- y-
-            point = c.y - 1;
-            isOut = true;
-            while (point >= miny) {
-                Cord2 move = new Cord2(c.x, point);
-                if (cords.contains(move)) {
-                    isOut = false;
-                    break;
-                }
-                --point;
-            }
-            if (isOut) {
-                outside.add(c);
-                ++outsideSum;
-            }
-        }
         System.out.println(outsideSum);
     }
 
@@ -342,40 +164,4 @@ public class D18 {
         }
 
     }
-
-    private static class Cord2 {
-
-        int x;
-        int y;
-
-        public Cord2(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            } else if (obj == this) {
-                return true;
-            } else if (!(obj instanceof Cord2)) {
-                return false;
-            } else {
-                return this.x == ((Cord2) obj).x && this.y == ((Cord2) obj).y;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.x, this.y);
-        }
-
-        @Override
-        public String toString() {
-            return this.x + "," + this.y;
-        }
-
-    }
 }
-
