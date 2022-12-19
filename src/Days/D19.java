@@ -110,7 +110,6 @@ public class D19 {
         private final int geodeRobotObsidianCost;
 
         private final int maxOre;
-        private final int minOre;
 
         private final int maxMinutes;
 
