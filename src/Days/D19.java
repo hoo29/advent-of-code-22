@@ -4,35 +4,31 @@ import Util.Util;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class D19 {
 
     public D19() throws IOException, InterruptedException, ExecutionException {
 
-        List<String> file = Util.readInput(19, true);
-        ExecutorService pool = Executors.newFixedThreadPool(16);
+        List<String> file = Util.readInput(19, false);
+        file = file.subList(0, 3);
+        ExecutorService pool = Executors.newFixedThreadPool(1);
 
         List<Future<Integer[]>> futures = new ArrayList<>();
 
-        // for (String line : file) {
-        // Blueprint b = new Blueprint(line);
-        // var future = pool.submit(b);
-        // futures.add(future);
-        // }
+        for (String line : file) {
+//            Blueprint b = new Blueprint(line, 24);
+            Blueprint b = new Blueprint(line, 32);
+            var future = pool.submit(b);
+            futures.add(future);
+        }
 
-        var future = pool.submit(new Blueprint(file.get(0)));
-        futures.add(future);
-
-        int sum = 0;
+//        int sum = 0;
+        int sum = 1;
         for (Future<Integer[]> f : futures) {
             Integer[] res = f.get();
-            // sum += res[0] * res[1];
-            sum += res[0];
+//            sum += res[0] * res[1];
+            sum *= res[0];
         }
         pool.shutdown();
 
@@ -40,7 +36,7 @@ public class D19 {
 
     }
 
-    private class Stats {
+    private static class Stats {
         int oreCount;
         int clayCount;
         int obsidianCount;
@@ -50,6 +46,8 @@ public class D19 {
         int obsidianRobotCount;
         int geodeRobotCount;
 
+        int minute;
+
         public Stats(
                 int oreCount,
                 int clayCount,
@@ -58,7 +56,8 @@ public class D19 {
                 int oreRobotCount,
                 int clayRobotCount,
                 int obsidianRobotCount,
-                int geodeRobotCount) {
+                int geodeRobotCount,
+                int minute) {
             this.oreCount = oreCount;
             this.clayCount = clayCount;
             this.obsidianCount = obsidianCount;
@@ -67,6 +66,7 @@ public class D19 {
             this.clayRobotCount = clayRobotCount;
             this.obsidianRobotCount = obsidianRobotCount;
             this.geodeRobotCount = geodeRobotCount;
+            this.minute = minute;
         }
 
         public Stats(Stats other) {
@@ -78,10 +78,27 @@ public class D19 {
             this.clayRobotCount = other.clayRobotCount;
             this.obsidianRobotCount = other.obsidianRobotCount;
             this.geodeRobotCount = other.geodeRobotCount;
+            this.minute = other.minute;
         }
-    };
 
-    private class Blueprint implements Callable<Integer[]> {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Stats stats = (Stats) o;
+            return oreCount == stats.oreCount && clayCount == stats.clayCount && obsidianCount == stats.obsidianCount
+                    && geodeCount == stats.geodeCount && oreRobotCount == stats.oreRobotCount
+                    && clayRobotCount == stats.clayRobotCount && obsidianRobotCount == stats.obsidianRobotCount
+                    && geodeRobotCount == stats.geodeRobotCount && minute == stats.minute;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(oreCount, clayCount, obsidianCount, geodeCount, oreRobotCount, clayRobotCount, obsidianRobotCount, geodeRobotCount, minute);
+        }
+    }
+
+    private static class Blueprint implements Callable<Integer[]> {
 
         private final int id;
 
@@ -93,9 +110,15 @@ public class D19 {
         private final int geodeRobotObsidianCost;
 
         private final int maxOre;
+        private final int minOre;
 
-        public Blueprint(String line) {
+        private final int maxMinutes;
 
+        private final Map<Stats, Integer> cache = new HashMap<>();
+
+        public Blueprint(String line, int maxMinutes) {
+
+            this.maxMinutes = maxMinutes;
             id = Integer.parseInt(line.substring(line.indexOf(" "), line.indexOf(":")).strip());
 
             String[] parts = line.substring(line.indexOf(":") + 1).strip().split("\\.");
@@ -111,14 +134,14 @@ public class D19 {
             geodeRobotObsidianCost = Integer.parseInt(parts[3].strip().split(" ")[7]);
 
             maxOre = Collections.max(Arrays
-                    .asList(new Integer[] { oreRobotOreCost, clayRobotOreCost, obsidianRobotOreCost,
-                            geodeRobotOreCost }));
+                    .asList(oreRobotOreCost, clayRobotOreCost, obsidianRobotOreCost,
+                            geodeRobotOreCost));
 
         }
 
         @Override
         public Integer[] call() throws Exception {
-
+            System.out.println("Starting blueprint " + id);
             int minute = 1;
 
             int oreCount = 0;
@@ -132,16 +155,15 @@ public class D19 {
             int geodeRobotCount = 0;
 
             Stats start = new Stats(oreCount, clayCount, obsidianCount, geodeCount, oreRobotCount, clayRobotCount,
-                    obsidianRobotCount, geodeRobotCount);
+                    obsidianRobotCount, geodeRobotCount, minute);
 
-            Integer maxCount = tick(minute, start);
+            int maxCount = tick(start);
 
             System.out.println("Finished blueprint " + id);
 
-            return new Integer[] {
+            return new Integer[]{
                     maxCount,
-                    id };
-
+                    id};
         }
 
         private Stats procMin(
@@ -176,14 +198,15 @@ public class D19 {
             } else if ("BUILD_GEODE".equals(op)) {
                 ++newStats.geodeRobotCount;
             }
+
+            ++newStats.minute;
             return newStats;
         }
 
         private int tick(
-                final int minute,
                 final Stats stats) {
 
-            if (minute >= 25) {
+            if (stats.minute >= (maxMinutes + 1)) {
                 return stats.geodeCount;
             }
 
@@ -192,26 +215,32 @@ public class D19 {
             // spend resources but in a sensible way
             List<Stats> options = new ArrayList<>();
 
+            boolean build = false;
             // build ore robot
             if (stats.oreRobotCount < maxOre && stats.oreCount >= oreRobotOreCost) {
                 options.add(procMin("BUILD_ORE", stats));
+                build = true;
             }
 
             // build clay robot
             if (stats.clayRobotCount < obsidianRobotClayCost && stats.oreCount >= clayRobotOreCost) {
                 options.add(procMin("BUILD_CLAY", stats));
+                build = true;
             }
 
             // build obsidian robot
             if (stats.obsidianRobotCount < geodeRobotObsidianCost && stats.oreCount >= obsidianRobotOreCost
                     && stats.clayCount >= obsidianRobotClayCost) {
                 options.add(procMin("BUILD_OBSIDIAN", stats));
+                build = true;
             }
 
             // build geode robot
             if (stats.oreCount >= geodeRobotOreCost && stats.obsidianCount >= geodeRobotObsidianCost) {
                 options.add(procMin("BUILD_GEODE", stats));
+                build = true;
             }
+
 
             // don't build anything
             if (stats.oreRobotCount < maxOre || stats.clayRobotCount < obsidianRobotClayCost
@@ -220,11 +249,22 @@ public class D19 {
             }
 
             for (final Stats option : options) {
-                int optionSum = tick(minute + 1, option);
-                if (optionSum > maxGeodeCount) {
-                    maxGeodeCount = optionSum;
+                if (cache.containsKey(option)) {
+                    int optionSum = cache.get(option);
+                    if (optionSum > maxGeodeCount) {
+                        maxGeodeCount = optionSum;
+                    }
+                } else {
+                    final int optionSum = tick(option);
+                    cache.put(option, optionSum);
+                    if (optionSum > maxGeodeCount) {
+                        maxGeodeCount = optionSum;
+                    }
                 }
             }
+
+            final int max = maxGeodeCount;
+            cache.compute(stats, (k, v) -> (v == null || max > v) ? max : v);
 
             return maxGeodeCount;
         }
