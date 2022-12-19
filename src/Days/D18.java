@@ -10,7 +10,6 @@ public class D18 {
     public D18() throws IOException {
 
         List<String> file = Util.readInput(18, false);
-        Map<Cord, Integer> notConnectedCount = new HashMap<>();
 
         final Set<Cord> droplet = file.stream().reduce(
                 new HashSet<>(),
@@ -61,8 +60,7 @@ public class D18 {
                 minz = c.z;
             }
 
-            int notConnected = 0;
-            Cord[] toCheck = new Cord[] {
+            Cord[] toCheck = new Cord[]{
                     new Cord(c.x - 1, c.y, c.z),
                     new Cord(c.x + 1, c.y, c.z),
 
@@ -79,7 +77,6 @@ public class D18 {
                 }
             }
             sum += cordNotConnectedCount;
-            notConnectedCount.put(c, cordNotConnectedCount);
         }
 
         System.out.println(sum);
@@ -94,7 +91,7 @@ public class D18 {
         int outsideSum = 0;
         while (waterToGrow.size() > 0) {
             Cord water = waterToGrow.pop();
-            Cord[] toCheck = new Cord[] {
+            Cord[] toCheck = new Cord[]{
                     new Cord(water.x - 1, water.y, water.z),
                     new Cord(water.x + 1, water.y, water.z),
 
