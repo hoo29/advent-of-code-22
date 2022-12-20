@@ -12,7 +12,7 @@ public class D19 {
 
         List<String> file = Util.readInput(19, false);
         file = file.subList(0, 3);
-        ExecutorService pool = Executors.newFixedThreadPool(1);
+        ExecutorService pool = Executors.newFixedThreadPool(3);
 
         List<Future<Integer[]>> futures = new ArrayList<>();
 
@@ -85,16 +85,32 @@ public class D19 {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
+
             Stats stats = (Stats) o;
-            return oreCount == stats.oreCount && clayCount == stats.clayCount && obsidianCount == stats.obsidianCount
-                    && geodeCount == stats.geodeCount && oreRobotCount == stats.oreRobotCount
-                    && clayRobotCount == stats.clayRobotCount && obsidianRobotCount == stats.obsidianRobotCount
-                    && geodeRobotCount == stats.geodeRobotCount && minute == stats.minute;
+
+            if (oreCount != stats.oreCount) return false;
+            if (clayCount != stats.clayCount) return false;
+            if (obsidianCount != stats.obsidianCount) return false;
+            if (geodeCount != stats.geodeCount) return false;
+            if (oreRobotCount != stats.oreRobotCount) return false;
+            if (clayRobotCount != stats.clayRobotCount) return false;
+            if (obsidianRobotCount != stats.obsidianRobotCount) return false;
+            if (geodeRobotCount != stats.geodeRobotCount) return false;
+            return minute == stats.minute;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(oreCount, clayCount, obsidianCount, geodeCount, oreRobotCount, clayRobotCount, obsidianRobotCount, geodeRobotCount, minute);
+            int result = oreCount;
+            result = 31 * result + clayCount;
+            result = 31 * result + obsidianCount;
+            result = 31 * result + geodeCount;
+            result = 31 * result + oreRobotCount;
+            result = 31 * result + clayRobotCount;
+            result = 31 * result + obsidianRobotCount;
+            result = 31 * result + geodeRobotCount;
+            result = 31 * result + minute;
+            return result;
         }
     }
 
@@ -139,7 +155,7 @@ public class D19 {
         }
 
         @Override
-        public Integer[] call() throws Exception {
+        public Integer[] call() {
             System.out.println("Starting blueprint " + id);
             int minute = 1;
 
@@ -212,34 +228,28 @@ public class D19 {
             int maxGeodeCount = Integer.MIN_VALUE;
 
             // spend resources but in a sensible way
-            List<Stats> options = new ArrayList<>();
+            List<Stats> options = new ArrayList<>(5);
 
-            boolean build = false;
             // build ore robot
             if (stats.oreRobotCount < maxOre && stats.oreCount >= oreRobotOreCost) {
                 options.add(procMin("BUILD_ORE", stats));
-                build = true;
             }
 
             // build clay robot
             if (stats.clayRobotCount < obsidianRobotClayCost && stats.oreCount >= clayRobotOreCost) {
                 options.add(procMin("BUILD_CLAY", stats));
-                build = true;
             }
 
             // build obsidian robot
             if (stats.obsidianRobotCount < geodeRobotObsidianCost && stats.oreCount >= obsidianRobotOreCost
                     && stats.clayCount >= obsidianRobotClayCost) {
                 options.add(procMin("BUILD_OBSIDIAN", stats));
-                build = true;
             }
 
             // build geode robot
             if (stats.oreCount >= geodeRobotOreCost && stats.obsidianCount >= geodeRobotObsidianCost) {
                 options.add(procMin("BUILD_GEODE", stats));
-                build = true;
             }
-
 
             // don't build anything
             if (stats.oreRobotCount < maxOre || stats.clayRobotCount < obsidianRobotClayCost
