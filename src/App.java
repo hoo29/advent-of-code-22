@@ -1,7 +1,7 @@
-import Days.D22pt2;
+import Days.D23;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        new D22pt2();
+        new D23();
     }
 }
